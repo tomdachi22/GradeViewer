@@ -1,7 +1,7 @@
 // =============================
 // CONFIG
 // =============================
-const API_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEBAPP_URL"; 
+const API_URL = "https://script.google.com/macros/s/AKfycby168962IDGI-fRyX7ml2eenU5gJHPk4P2S4rLbUwTE-k53eWehzGXA616utmNrA6t_Tw/exec"; 
 // Replace with your deployed Apps Script Web App link
 
 // =============================
