@@ -2,54 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <div class="dashboard">
-    <aside class="sidebar">
-      <h3>WELCOME Admin!</h3>
-      <p>What would you like to do?</p>
-      <button onclick="showSection('register')">Register Student</button>
-      <button onclick="showSection('update')">Update Records</button>
-      <button onclick="showSection('subjects')">Update Subjects</button>
-      <button onclick="showSection('delete')">Delete Records</button>
-      <button onclick="exitAdmin()">Exit</button>
-    </aside>
+<body class="admin-page">
+  <div class="container">
+    <h2>Welcome Admin!</h2>
+    <p>Here are all student records:</p>
 
-    <main class="content">
-      <!-- Register Student Section -->
-      <section id="register" class="admin-section">
-        <h3>Register Student</h3>
-        <input type="text" id="firstName" placeholder="First Name">
-        <input type="text" id="lastName" placeholder="Last Name">
-        <input type="text" id="program" placeholder="Program">
-        <input type="text" id="block" placeholder="Block">
-        <input type="text" id="courses" placeholder="Courses (comma separated)">
-        <button onclick="registerStudent()">Register Student</button>
-      </section>
+    <table id="adminTable" border="1" cellspacing="0" cellpadding="8">
+      <!-- Filled by script.js -->
+    </table>
 
-      <!-- Update Records Section -->
-      <section id="update" class="admin-section hidden">
-        <h3>Update Student Records</h3>
-        <p>Work in progress…</p>
-      </section>
-
-      <!-- Update Subjects Section -->
-      <section id="subjects" class="admin-section hidden">
-        <h3>Update Subjects</h3>
-        <p>Work in progress…</p>
-      </section>
-
-      <!-- Delete Records Section -->
-      <section id="delete" class="admin-section hidden">
-        <h3>Delete Student Records</h3>
-        <p>Work in progress…</p>
-      </section>
-    </main>
+    <button id="logoutBtn">Logout</button>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>

@@ -1,155 +1,163 @@
-// =============================
+// ==========================
 // CONFIG
-// =============================
-const API_URL = "https://script.google.com/macros/s/AKfycby168962IDGI-fRyX7ml2eenU5gJHPk4P2S4rLbUwTE-k53eWehzGXA616utmNrA6t_Tw/exec"; 
-// Replace with your deployed Apps Script Web App link
+// ==========================
 
-// =============================
-// LOGIN FUNCTION
-// =============================
-async function login() {
-  const username = document.getElementById("username")?.value;
-  const password = document.getElementById("password")?.value;
+// Replace with your Google Sheet JSON export URL
+// (publish the sheet → File > Share > Publish to web → get the CSV/TSV link or use API)
+const SHEET_URL = "https://script.google.com/macros/s/AKfycby168962IDGI-fRyX7ml2eenU5gJHPk4P2S4rLbUwTE-k53eWehzGXA616utmNrA6t_Tw/exec";
 
-  if (!username || !password) {
-    alert("Please enter both username and password");
+// Will store fetched users/grades
+window.users = [];
+
+
+// ==========================
+// FETCH DATA FROM GOOGLE SHEETS
+// ==========================
+async function loadData() {
+  try {
+    const response = await fetch(SHEET_URL);
+    const data = await response.json();
+
+    // Example: adapt this depending on your Sheet’s structure
+    // Assuming sheet columns: Username | Password | Role | Subject | Grade
+    window.users = data.map(row => ({
+      username: row.Username,
+      password: row.Password,
+      role: row.Role,
+      subject: row.Subject,
+      grade: row.Grade
+    }));
+
+    console.log("Data loaded:", window.users);
+  } catch (error) {
+    console.error("Error loading data:", error);
+    alert("Failed to load data from Google Sheets.");
+  }
+}
+
+
+// ==========================
+// LOGIN HANDLER
+// ==========================
+function handleLogin(event) {
+  event.preventDefault();
+
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  let matchedUser = window.users.find(
+    user => user.username === username && user.password === password
+  );
+
+  if (matchedUser) {
+    // Save session in localStorage
+    localStorage.setItem("loggedInUser", JSON.stringify(matchedUser));
+
+    if (matchedUser.role === "admin") {
+      window.location.href = "admin.html";
+    } else {
+      window.location.href = "student.html";
+    }
+  } else {
+    alert("Invalid username or password!");
+  }
+}
+
+
+// ==========================
+// STUDENT DASHBOARD
+// ==========================
+function loadStudentPage() {
+  const user = JSON.parse(localStorage.getItem("loggedInUser"));
+  if (!user || user.role !== "student") {
+    alert("Access denied. Please log in as a student.");
+    window.location.href = "index.html";
     return;
   }
 
-  try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify({ action: "login", username, password })
-    });
+  document.getElementById("studentName").textContent = user.username;
 
-    const result = await response.json();
+  // Show this student's grades
+  const grades = window.users.filter(u => u.username === user.username);
 
-    if (result.success) {
-      // If admin login, redirect to admin.html
-      if (result.role === "admin") {
-        localStorage.setItem("adminSession", "true");
-        window.location.href = "admin.html";
-      } else {
-        // Student login → save student data
-        localStorage.setItem("studentData", JSON.stringify(result.student));
-        window.location.href = "student.html";
-      }
-    } else {
-      alert("Invalid credentials. Try again.");
-    }
-  } catch (err) {
-    console.error("Login error:", err);
-    alert("Error connecting to server.");
-  }
+  const table = document.getElementById("gradesTable");
+  table.innerHTML = `
+    <tr>
+      <th>Subject</th>
+      <th>Grade</th>
+    </tr>
+  `;
+
+  grades.forEach(g => {
+    table.innerHTML += `
+      <tr>
+        <td>${g.subject}</td>
+        <td>${g.grade}</td>
+      </tr>
+    `;
+  });
 }
 
-// =============================
-// ADMIN DASHBOARD FUNCTIONS
-// =============================
 
-// Show one section at a time
-function showSection(sectionId) {
-  document.querySelectorAll(".admin-section").forEach(sec => sec.classList.add("hidden"));
-  document.getElementById(sectionId).classList.remove("hidden");
-}
-
-// Exit Admin Dashboard
-function exitAdmin() {
-  localStorage.removeItem("adminSession");
-  window.location.href = "login.html";
-}
-
-// Register Student
-async function registerStudent() {
-  const data = {
-    action: "register",
-    firstName: document.getElementById("firstName").value,
-    lastName: document.getElementById("lastName").value,
-    program: document.getElementById("program").value,
-    block: document.getElementById("block").value,
-    courses: document.getElementById("courses").value
-  };
-
-  if (!data.firstName || !data.lastName || !data.program || !data.block) {
-    alert("Please fill in all fields");
+// ==========================
+// ADMIN DASHBOARD
+// ==========================
+function loadAdminPage() {
+  const user = JSON.parse(localStorage.getItem("loggedInUser"));
+  if (!user || user.role !== "admin") {
+    alert("Access denied. Please log in as an admin.");
+    window.location.href = "index.html";
     return;
   }
 
-  try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify(data)
-    });
+  const table = document.getElementById("adminTable");
+  table.innerHTML = `
+    <tr>
+      <th>Username</th>
+      <th>Subject</th>
+      <th>Grade</th>
+    </tr>
+  `;
 
-    const result = await response.json();
-    alert(result.message || "Student registered successfully!");
-    
-    // Clear form
-    document.getElementById("firstName").value = "";
-    document.getElementById("lastName").value = "";
-    document.getElementById("program").value = "";
-    document.getElementById("block").value = "";
-    document.getElementById("courses").value = "";
-  } catch (err) {
-    console.error("Register error:", err);
-    alert("Error connecting to server.");
-  }
+  window.users.forEach(u => {
+    table.innerHTML += `
+      <tr>
+        <td>${u.username}</td>
+        <td>${u.subject}</td>
+        <td>${u.grade}</td>
+      </tr>
+    `;
+  });
 }
 
-// =============================
-// STUDENT DASHBOARD FUNCTIONS
-// =============================
-window.onload = function () {
-  // If student.html is loaded
-  if (document.getElementById("welcomeText")) {
-    const studentData = JSON.parse(localStorage.getItem("studentData"));
-    if (!studentData) {
-      window.location.href = "login.html";
-      return;
-    }
 
-    // Display student info
-    document.getElementById("welcomeText").textContent =
-      `Welcome ${studentData.firstName} ${studentData.lastName}!`;
-    document.getElementById("studentInfo").textContent =
-      `${studentData.program} - Block ${studentData.block}`;
-
-    // Load grades from API
-    loadGrades(studentData.username);
-  }
-};
-
-// Fetch grades from backend
-async function loadGrades(username) {
-  try {
-    const response = await fetch(API_URL + "?action=getGrades&username=" + username);
-    const result = await response.json();
-
-    const gradesTable = document.getElementById("gradesTable");
-    gradesTable.innerHTML = "";
-
-    if (result.success && result.grades.length > 0) {
-      result.grades.forEach(grade => {
-        gradesTable.innerHTML += `
-          <tr>
-            <td>${grade.period}</td>
-            <td>${grade.course}</td>
-            <td>${grade.grade}</td>
-            <td>${grade.remarks}</td>
-          </tr>
-        `;
-      });
-    } else {
-      gradesTable.innerHTML = `<tr><td colspan="4">No grades available</td></tr>`;
-    }
-  } catch (err) {
-    console.error("Error loading grades:", err);
-    alert("Could not load grades.");
-  }
+// ==========================
+// LOGOUT
+// ==========================
+function handleLogout() {
+  localStorage.removeItem("loggedInUser");
+  window.location.href = "index.html";
 }
 
-// Logout for students
-function logout() {
-  localStorage.removeItem("studentData");
-  window.location.href = "login.html";
-}
+
+// ==========================
+// INIT
+// ==========================
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadData();
+
+  // Detect which page we’re on
+  if (document.body.classList.contains("login-page")) {
+    document.getElementById("loginForm").addEventListener("submit", handleLogin);
+  }
+
+  if (document.body.classList.contains("student-page")) {
+    loadStudentPage();
+    document.getElementById("logoutBtn").addEventListener("click", handleLogout);
+  }
+
+  if (document.body.classList.contains("admin-page")) {
+    loadAdminPage();
+    document.getElementById("logoutBtn").addEventListener("click", handleLogout);
+  }
+});
