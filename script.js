@@ -4,7 +4,7 @@
 
 // Replace with your Google Sheet JSON export URL
 // (publish the sheet → File > Share > Publish to web → get the CSV/TSV link or use API)
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/https://docs.google.com/spreadsheets/d/e/2PACX-1vRJIoMgbQHkHWzdbQ91gfpk8jiqO5NTurkdKxeE_S4sdgkXSBoIq3vM3vwSesBz2pMNU2kS7YjZVnnM/pubhtml/gviz/tq?tqx=out:json";
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJIoMgbQHkHWzdbQ91gfpk8jiqO5NTurkdKxeE_S4sdgkXSBoIq3vM3vwSesBz2pMNU2kS7YjZVnnM/pubhtml/gviz/tq?tqx=out:json";
 
 async function loadData() {
   try {
