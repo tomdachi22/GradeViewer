@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Grade Viewer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="dashboard">
+    <main class="content">
+      <h2 id="welcomeText">Welcome [Student Name]!</h2>
+      <p id="studentInfo"></p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Grading Period</th>
+            <th>Course</th>
+            <th>Grade</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody id="gradesTable">
+          <!-- Grades will be injected here -->
+        </tbody>
+      </table>
+
+      <button onclick="logout()">Done</button>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
