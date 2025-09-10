@@ -4,36 +4,32 @@
 
 // Replace with your Google Sheet JSON export URL
 // (publish the sheet → File > Share > Publish to web → get the CSV/TSV link or use API)
-const SHEET_URL = "https://script.google.com/macros/s/AKfycby168962IDGI-fRyX7ml2eenU5gJHPk4P2S4rLbUwTE-k53eWehzGXA616utmNrA6t_Tw/exec";
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/https://docs.google.com/spreadsheets/d/e/2PACX-1vRJIoMgbQHkHWzdbQ91gfpk8jiqO5NTurkdKxeE_S4sdgkXSBoIq3vM3vwSesBz2pMNU2kS7YjZVnnM/pubhtml/gviz/tq?tqx=out:json";
 
-// Will store fetched users/grades
-window.users = [];
-
-
-// ==========================
-// FETCH DATA FROM GOOGLE SHEETS
-// ==========================
 async function loadData() {
   try {
     const response = await fetch(SHEET_URL);
-    const data = await response.json();
+    const text = await response.text();
 
-    // Example: adapt this depending on your Sheet’s structure
-    // Assuming sheet columns: Username | Password | Role | Subject | Grade
-    window.users = data.map(row => ({
-      username: row.Username,
-      password: row.Password,
-      role: row.Role,
-      subject: row.Subject,
-      grade: row.Grade
+    // Google wraps JSON in a weird prefix/suffix → need to clean
+    const json = JSON.parse(text.substr(47).slice(0, -2));
+
+    const rows = json.table.rows;
+    window.users = rows.map(r => ({
+      username: r.c[0]?.v,
+      password: r.c[1]?.v,
+      role: r.c[2]?.v,
+      subject: r.c[3]?.v,
+      grade: r.c[4]?.v
     }));
 
-    console.log("Data loaded:", window.users);
+    console.log("Loaded users:", window.users);
   } catch (error) {
     console.error("Error loading data:", error);
     alert("Failed to load data from Google Sheets.");
   }
 }
+
 
 
 // ==========================
