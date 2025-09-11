@@ -4,7 +4,7 @@
 
 // Replace with your Google Sheet JSON export URL
 // (File → Share → Publish to web → choose sheet → copy the "gviz" link and add ?tqx=out:json)
-const SHEET_URL = "YOUR_GOOGLE_SHEET_JSON_URL";
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJIoMgbQHkHWzdbQ91gfpk8jiqO5NTurkdKxeE_S4sdgkXSBoIq3vM3vwSesBz2pMNU2kS7YjZVnnM/pub?output=csv";
 
 let users = []; // cache loaded users
 
