@@ -2,31 +2,31 @@
 // CONFIG
 // ==========================
 
-// Replace with your Google Sheet JSON export URL
-// (File → Share → Publish to web → choose sheet → copy the "gviz" link and add ?tqx=out:json)
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJIoMgbQHkHWzdbQ91gfpk8jiqO5NTurkdKxeE_S4sdgkXSBoIq3vM3vwSesBz2pMNU2kS7YjZVnnM/pub?output=csv";
+// Replace with your Google Sheet CSV export URL
+// (File → Share → Publish to web → choose sheet → copy "CSV" link)
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-XXXXX/pub?output=csv";
 
 let users = []; // cache loaded users
 
 
 // ==========================
-// LOAD DATA FROM SHEET
+// LOAD DATA FROM SHEET (CSV)
 // ==========================
 async function loadData() {
   try {
     const response = await fetch(SHEET_URL);
     const text = await response.text();
 
-    // Clean Google’s JSON response
-    const json = JSON.parse(text.substr(47).slice(0, -2));
-    const rows = json.table.rows;
+    // Convert CSV into array of rows
+    const rows = text.trim().split("\n").map(r => r.split(","));
 
-    users = rows.map(r => ({
-      username: r.c[0]?.v || "",
-      password: r.c[1]?.v || "",
-      role: r.c[2]?.v || "",
-      subject: r.c[3]?.v || "",
-      grade: r.c[4]?.v || ""
+    // Skip the header row
+    users = rows.slice(1).map(r => ({
+      username: r[0]?.trim() || "",
+      password: r[1]?.trim() || "",
+      role: r[2]?.trim() || "",
+      subject: r[3]?.trim() || "",
+      grade: r[4]?.trim() || ""
     }));
 
     console.log("✅ Data loaded:", users);
@@ -43,7 +43,6 @@ async function loadData() {
 async function handleLogin(event) {
   event.preventDefault();
 
-  // Ensure data is ready
   if (!users.length) {
     await loadData();
   }
@@ -56,7 +55,6 @@ async function handleLogin(event) {
   );
 
   if (matchedUser) {
-    // Save session
     localStorage.setItem("loggedInUser", JSON.stringify(matchedUser));
 
     if (matchedUser.role.toLowerCase() === "admin") {
@@ -90,9 +88,7 @@ async function loadStudentPage() {
   const grades = users.filter(u => u.username === user.username);
 
   const table = document.getElementById("gradesTable");
-  table.innerHTML = `
-    <tr><th>Subject</th><th>Grade</th></tr>
-  `;
+  table.innerHTML = `<tr><th>Subject</th><th>Grade</th></tr>`;
 
   grades.forEach(g => {
     table.innerHTML += `
@@ -121,9 +117,7 @@ async function loadAdminPage() {
   }
 
   const table = document.getElementById("adminTable");
-  table.innerHTML = `
-    <tr><th>Username</th><th>Subject</th><th>Grade</th></tr>
-  `;
+  table.innerHTML = `<tr><th>Username</th><th>Subject</th><th>Grade</th></tr>`;
 
   users.forEach(u => {
     table.innerHTML += `
@@ -150,7 +144,6 @@ function handleLogout() {
 // INIT
 // ==========================
 document.addEventListener("DOMContentLoaded", async () => {
-  // Preload data once
   await loadData();
 
   if (document.body.classList.contains("login-page")) {
